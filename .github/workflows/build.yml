@@ -1,0 +1,73 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Test
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
+
+      - name: Build app and installer
+        run: cargo tauri build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: lobby-windows
+          path: |
+            src-tauri/target/release/lobby.exe
+            src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+
+      # Tags like v1.2.0 publish under that tag; pushes to main publish v<app version>-build.<run>.
+      - name: Choose release tag
+        id: tag
+        if: github.event_name != 'pull_request'
+        shell: pwsh
+        run: |
+          $version = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $tag = $env:GITHUB_REF_NAME
+            $name = "Lobby $($tag.TrimStart('v'))"
+          } else {
+            $tag = "v$version-build.$env:GITHUB_RUN_NUMBER"
+            $name = "Lobby $version (build $env:GITHUB_RUN_NUMBER)"
+          }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "name=$name" >> $env:GITHUB_OUTPUT
+
+      - name: Publish release
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.name }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          make_latest: true
+          files: |
+            src-tauri/target/release/lobby.exe
+            src-tauri/target/release/bundle/nsis/*.exe
