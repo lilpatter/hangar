@@ -319,7 +319,7 @@ async function addAccount() {
   closeSheet();
   try {
     await invoke('add_account');
-    banner('Sign in with Steam', 'Steam’s sign-in window is open. Check “Remember me” so Lobby can switch to the account silently later.', 'ok');
+    banner('Sign in with Steam', 'Steam’s sign-in window is open. Check “Remember me” so Hangar can switch to the account silently later.', 'ok');
   } catch (e) {
     banner('Couldn’t open Steam', String(e));
   }
@@ -653,7 +653,7 @@ function accountsPage() {
       }).join('')}
       <button class="person add" data-action="add-account"><span class="plus">${icon('plus')}</span><div class="pname">Add Account</div><div class="aname">Opens Steam’s sign-in window</div></button>
     </div>
-    <p class="footnote" style="margin-top:16px">An account switches silently once it has signed in on this PC with “Remember me” checked. Steam keeps that sign-in token; Lobby never sees or stores passwords.</p>
+    <p class="footnote" style="margin-top:16px">An account switches silently once it has signed in on this PC with “Remember me” checked. Steam keeps that sign-in token; Hangar never sees or stores passwords.</p>
   </div>`;
 }
 
@@ -716,7 +716,7 @@ function settingsPage() {
     </div>
     <div class="group-title">About</div>
     <div class="group">
-      <div class="cell"><div class="grow">Lobby</div><div class="val">Version 1.0.0</div></div>
+      <div class="cell"><div class="grow">Hangar</div><div class="val">Version 1.0.0</div></div>
       <div class="cell"><div class="grow">Game data</div><div class="val">Steam client cache · Steam store</div></div>
     </div>
     <p class="footnote">Not affiliated with Valve. Steam and the Steam logo are trademarks of Valve Corporation.</p>
@@ -850,6 +850,6 @@ document.addEventListener('contextmenu', (e) => { if (!e.target.closest('input, 
     if (!hero || hero.matches(':hover') || !$('#sheet').hidden || document.hidden) return;
     stepHero(1);
   }, 9000);
-  // Pick up installs and uninstalls made in Steam while Lobby was in the background.
+  // Pick up installs and uninstalls made in Steam while Hangar was in the background.
   window.addEventListener('focus', () => { if (Date.now() - (state.loadedAt || 0) > 20000) load(); });
 })();

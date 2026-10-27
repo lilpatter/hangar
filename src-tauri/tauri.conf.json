@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Lobby",
+  "productName": "Hangar",
   "version": "1.0.0",
-  "identifier": "dev.patrick.lobby",
+  "identifier": "dev.patrick.hangar",
   "build": {
     "frontendDist": "../ui"
   },
@@ -11,7 +11,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Lobby",
+        "title": "Hangar",
         "width": 1280,
         "height": 820,
         "minWidth": 980,

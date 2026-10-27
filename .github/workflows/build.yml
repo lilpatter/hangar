@@ -36,9 +36,9 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: lobby-windows
+          name: hangar-windows
           path: |
-            src-tauri/target/release/lobby.exe
+            src-tauri/target/release/hangar.exe
             src-tauri/target/release/bundle/nsis/*.exe
           if-no-files-found: error
 
@@ -51,10 +51,10 @@ jobs:
           $version = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
           if ($env:GITHUB_REF -like 'refs/tags/v*') {
             $tag = $env:GITHUB_REF_NAME
-            $name = "Lobby $($tag.TrimStart('v'))"
+            $name = "Hangar $($tag.TrimStart('v'))"
           } else {
             $tag = "v$version-build.$env:GITHUB_RUN_NUMBER"
-            $name = "Lobby $version (build $env:GITHUB_RUN_NUMBER)"
+            $name = "Hangar $version (build $env:GITHUB_RUN_NUMBER)"
           }
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "name=$name" >> $env:GITHUB_OUTPUT
@@ -69,5 +69,5 @@ jobs:
           generate_release_notes: true
           make_latest: true
           files: |
-            src-tauri/target/release/lobby.exe
+            src-tauri/target/release/hangar.exe
             src-tauri/target/release/bundle/nsis/*.exe

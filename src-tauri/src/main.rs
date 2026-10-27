@@ -131,5 +131,5 @@ fn main() {
             settings_set
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Lobby");
+        .expect("error while running Hangar");
 }

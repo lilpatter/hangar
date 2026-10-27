@@ -10,7 +10,7 @@ fn client() -> &'static reqwest::Client {
     C.get_or_init(|| {
         reqwest::Client::builder()
             .timeout(Duration::from_secs(15))
-            .user_agent("Lobby/1.0 (Windows)")
+            .user_agent("Hangar/1.0 (Windows)")
             .build()
             .expect("http client")
     })

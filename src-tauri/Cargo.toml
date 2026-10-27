@@ -1,5 +1,5 @@
 [package]
-name = "lobby"
+name = "hangar"
 version = "1.0.0"
 description = "Switch Steam accounts quietly and browse every game you own."
 authors = ["Patrick"]

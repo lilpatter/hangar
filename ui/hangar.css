@@ -1,4 +1,4 @@
-/* Lobby-specific views, layered on the shared HIG styles in styles.css. */
+/* Hangar-specific views, layered on the shared HIG styles in styles.css. */
 .me { width: calc(100% + 16px); padding: 6px 8px; margin: 0 -8px; border-radius: 8px; text-align: left; }
 .me:hover { background: var(--fill-2); }
 .me .chev { margin-left: auto; color: var(--label-3); width: 14px; height: 14px; }

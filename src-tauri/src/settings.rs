@@ -32,10 +32,19 @@ impl Default for Settings {
     }
 }
 
+/// The app was called Lobby before; its settings lived under this identifier.
+const OLD_IDENTIFIER: &str = "dev.patrick.lobby";
+
 fn file(app: &AppHandle) -> Result<PathBuf, String> {
     let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-    Ok(dir.join("settings.json"))
+    let path = dir.join("settings.json");
+    if !path.exists() {
+        if let Some(old) = dir.parent().map(|p| p.join(OLD_IDENTIFIER).join("settings.json")) {
+            let _ = std::fs::copy(old, &path);
+        }
+    }
+    Ok(path)
 }
 
 pub fn load(app: &AppHandle) -> Settings {

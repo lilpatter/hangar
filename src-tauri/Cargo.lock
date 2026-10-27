@@ -1258,6 +1258,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "hangar"
+version = "1.0.0"
+dependencies = [
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "urlencoding",
+ "windows-sys 0.59.0",
+ "winreg 0.55.0",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1835,20 +1849,6 @@ name = "litemap"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
-
-[[package]]
-name = "lobby"
-version = "1.0.0"
-dependencies = [
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "urlencoding",
- "windows-sys 0.59.0",
- "winreg 0.55.0",
-]
 
 [[package]]
 name = "lock_api"
