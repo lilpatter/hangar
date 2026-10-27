@@ -47,6 +47,17 @@ cargo tauri build
 - Pushing a tag such as `v1.1.0` publishes a release under that tag.
 - Pull requests only build. The files are attached to the run as the `hangar-windows` artifact.
 
+## Self-update
+
+CI builds embed the tag they're published under (`HANGAR_RELEASE_TAG`). On launch and every 6 hours Hangar asks GitHub for the latest release and compares `<version>` and the build number in its tag with its own. If the release is newer, Hangar waits until no account switch is running and no sheet is open, and counts down for 10 seconds. You can choose Later or Update Now. Then it:
+
+1. Downloads `hangar.exe` from the release next to the running exe, as `<exe>.new`, and checks its size and GitHub's SHA-256 digest. A release without a digest, or hosted anywhere but this repository's releases, is refused.
+2. Renames the running exe to `<exe>.old`. Windows allows renaming a running exe but not deleting it.
+3. Moves `<exe>.new` into its place, starts it with `--updated`, and exits.
+4. The new process waits for the old one to exit, deletes `<exe>.old`, opens its window and says which version it updated to.
+
+This works for the portable exe and for the NSIS install, which goes to `%LOCALAPPDATA%` and so needs no admin rights. Local and pull request builds have no tag and never update themselves. You can turn self-update off under Settings › About.
+
 ## Layout
 
 ```
@@ -56,6 +67,7 @@ src-tauri/src/
   steam.rs          Steam paths, accounts, library, switching
   vdf.rs            Valve KeyValues: text files and the binary appinfo.vdf
   store.rs          Steam store details and the optional Web API
+  selfupdate.rs     updates Hangar itself from GitHub Releases
   settings.rs       settings.json, including favorites
 ```
 

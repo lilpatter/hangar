@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod selfupdate;
 mod settings;
 mod steam;
 mod store;
@@ -91,6 +92,16 @@ fn settings_set(app: AppHandle, value: settings::Settings) -> Result<(), String>
     settings::save(&app, &value)
 }
 
+#[tauri::command]
+async fn app_update_check(app: AppHandle) -> Result<selfupdate::Status, String> {
+    selfupdate::check(&app).await
+}
+
+#[tauri::command]
+async fn app_update_install(app: AppHandle) -> Result<(), String> {
+    selfupdate::install(&app).await
+}
+
 fn mime(path: &std::path::Path) -> &'static str {
     match path.extension().and_then(|e| e.to_str()).map(|e| e.to_ascii_lowercase()).as_deref() {
         Some("png") => "image/png",
@@ -102,6 +113,7 @@ fn mime(path: &std::path::Path) -> &'static str {
 }
 
 fn main() {
+    selfupdate::cleanup();
     tauri::Builder::default()
         // Artwork and avatars straight from Steam's own caches, so the library works offline.
         .register_asynchronous_uri_scheme_protocol("art", |_ctx, request, responder| {
@@ -128,7 +140,9 @@ fn main() {
             open_url,
             reveal,
             settings_get,
-            settings_set
+            settings_set,
+            app_update_check,
+            app_update_install
         ])
         .run(tauri::generate_context!())
         .expect("error while running Hangar");

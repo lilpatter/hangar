@@ -15,6 +15,8 @@ pub struct Settings {
     pub sort: String,
     pub scope: String,
     pub show_software: bool,
+    /// Install new releases from GitHub as soon as they're published.
+    pub auto_update: bool,
 }
 
 impl Default for Settings {
@@ -28,6 +30,7 @@ impl Default for Settings {
             sort: "name".into(),
             scope: "account".into(),
             show_software: true,
+            auto_update: true,
         }
     }
 }

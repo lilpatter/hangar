@@ -716,11 +716,115 @@ function settingsPage() {
     </div>
     <div class="group-title">About</div>
     <div class="group">
-      <div class="cell"><div class="grow">Hangar</div><div class="val">Version 1.0.0</div></div>
+      <div class="cell"><div class="grow"><div class="title">Hangar</div><div class="note">${appUpdateNote()}</div></div>
+        <div class="val">${appUpdate.status ? `Version ${esc(appVersion(appUpdate.status))}` : ''}</div>
+        <button class="btn${appUpdate.status?.latest?.newer ? ' blue' : ''}" data-action="app-update-check" ${appUpdate.checking || appUpdate.phase === 'installing' ? 'disabled' : ''}>${appUpdate.status?.latest?.newer ? 'Update Now' : 'Check Now'}</button></div>
+      ${sw('autoUpdate', 'Update Hangar automatically', 'Installs new versions from GitHub and restarts Hangar when it isn’t busy.')}
       <div class="cell"><div class="grow">Game data</div><div class="val">Steam client cache · Steam store</div></div>
     </div>
     <p class="footnote">Not affiliated with Valve. Steam and the Steam logo are trademarks of Valve Corporation.</p>
   </div>`;
+}
+
+// ---------- Hangar's own updates ----------
+// phase: idle → waiting (for an account switch to finish) → countdown → installing
+const appUpdate = { status: null, checking: false, error: null, phase: 'idle', countdown: 0, timer: null, deferred: false, percent: 0, welcomed: false };
+const appBusy = () => !!state.switching || !$('#sheet').hidden;
+
+function appVersion(s) {
+  if (!s) return '';
+  if (!s.tag) return `${s.version} (local build)`;
+  const m = s.tag.match(/^v?(.+?)-build\.(\d+)$/);
+  return m ? `${m[1]} (build ${m[2]})` : s.tag.replace(/^v/, '');
+}
+
+async function checkAppUpdate({ manual = false } = {}) {
+  if (appUpdate.checking || appUpdate.phase === 'installing') return;
+  appUpdate.checking = true;
+  if (state.page === 'settings') renderPage();
+  try {
+    appUpdate.status = await invoke('app_update_check');
+    appUpdate.error = null;
+  } catch (e) {
+    appUpdate.error = String(e);
+    if (manual) banner('Couldn’t check for Hangar updates', String(e));
+  }
+  appUpdate.checking = false;
+  if (state.page === 'settings') renderPage();
+  const latest = appUpdate.status?.latest;
+  if (appUpdate.status?.justUpdated && !appUpdate.welcomed) {
+    appUpdate.welcomed = true;
+    if (!latest?.newer) banner(`Updated to ${appVersion(appUpdate.status)}`, 'You’re running the latest Hangar.', 'ok');
+  }
+  if (latest?.newer) {
+    if (manual) installAppUpdate();
+    else if (state.settings.autoUpdate && !appUpdate.deferred && appUpdate.phase === 'idle') waitToUpdate();
+  } else if (manual && appUpdate.status) {
+    banner(appUpdate.status.tag ? 'Hangar is up to date' : 'This is a local build', appUpdate.status.tag ? `You have ${appVersion(appUpdate.status)}.` : 'Only builds from GitHub update themselves.', 'ok');
+  }
+}
+
+function waitToUpdate() {
+  clearInterval(appUpdate.timer);
+  appUpdate.phase = 'waiting';
+  const tryStart = () => {
+    if (appBusy()) return;
+    clearInterval(appUpdate.timer);
+    appUpdate.phase = 'countdown';
+    appUpdate.countdown = 10;
+    renderAppUpdateBanner();
+    appUpdate.timer = setInterval(() => {
+      if (appBusy()) { appUpdate.phase = 'idle'; $('#banner').innerHTML = ''; waitToUpdate(); return; }
+      if (--appUpdate.countdown <= 0) installAppUpdate();
+      else renderAppUpdateBanner();
+    }, 1000);
+  };
+  appUpdate.timer = setInterval(tryStart, 15000);
+  tryStart();
+}
+
+async function installAppUpdate() {
+  clearInterval(appUpdate.timer);
+  if (appUpdate.phase === 'installing') return;
+  appUpdate.phase = 'installing';
+  appUpdate.percent = 0;
+  renderAppUpdateBanner();
+  try {
+    await invoke('app_update_install');
+  } catch (e) {
+    appUpdate.phase = 'idle';
+    banner('Couldn’t update Hangar', String(e));
+  }
+  if (state.page === 'settings') renderPage();
+}
+
+function renderAppUpdateBanner() {
+  clearTimeout(banner.t);
+  const name = esc(appUpdate.status?.latest?.name || 'A new version of Hangar');
+  const body = appUpdate.phase === 'installing'
+    ? `<b>Updating to ${name}</b><div class="note">${appUpdate.percent >= 100 ? 'Restarting…' : `Downloading… ${appUpdate.percent}%`}</div>`
+    : `<b>${name} is available</b><div class="note">Hangar will restart to update in ${appUpdate.countdown} s.</div>`;
+  const buttons = appUpdate.phase === 'installing' ? ''
+    : '<button class="btn" data-action="app-update-later">Later</button><button class="btn blue" data-action="app-update-now">Update Now</button>';
+  $('#banner').innerHTML = `<div class="banner ok" role="status">${icon('refresh')}<div class="grow">${body}</div>${buttons}</div>`;
+}
+
+T.event.listen('self-update', ({ payload: p }) => {
+  appUpdate.percent = p.state === 'restarting' ? 100 : Math.floor((p.received / (p.total || 1)) * 100);
+  if (appUpdate.phase === 'installing') renderAppUpdateBanner();
+});
+
+setInterval(() => { if (state.settings?.autoUpdate) checkAppUpdate(); }, 6 * 3600000);
+
+function appUpdateNote() {
+  const s = appUpdate.status;
+  if (appUpdate.phase === 'installing') return 'Updating…';
+  if (appUpdate.checking) return 'Checking GitHub…';
+  if (appUpdate.error) return esc(appUpdate.error);
+  if (!s) return '';
+  if (!s.tag) return 'Local build. Only builds from GitHub update themselves.';
+  if (s.latest?.newer) return `${esc(s.latest.name)} is available`;
+  return 'Up to date';
 }
 
 // ---------- Events ----------
@@ -781,6 +885,9 @@ const actions = {
       <div style="color:var(--label-2)">${plural(state.settings.favorites.length, 'game')} will be removed from Favorites. The games stay in your library.</div>
     </div>
     <footer><button class="btn" data-action="close-sheet" autofocus>Cancel</button><button class="btn blue" style="background:var(--red)" data-action="do-clear-favs">Clear</button></footer>`, { cls: 'small' }),
+  'app-update-check': () => (appUpdate.status?.latest?.newer ? installAppUpdate() : checkAppUpdate({ manual: true })),
+  'app-update-now': installAppUpdate,
+  'app-update-later': () => { clearInterval(appUpdate.timer); appUpdate.phase = 'idle'; appUpdate.deferred = true; $('#banner').innerHTML = ''; },
   'do-clear-favs': async () => { closeSheet(); await saveSettings({ favorites: [] }); renderChrome(); renderPage(); }
 };
 
@@ -798,6 +905,7 @@ document.addEventListener('change', async (e) => {
     await saveSettings({ [key]: e.target.checked });
     renderChrome();
     if (key === 'showSoftware') renderPage();
+    if (key === 'autoUpdate' && e.target.checked) { appUpdate.deferred = false; checkAppUpdate(); }
   }
   const sel = e.target.dataset.settingSelect;
   if (sel) { await saveSettings({ [sel]: e.target.value }); renderPage(); }
@@ -838,11 +946,12 @@ document.addEventListener('contextmenu', (e) => { if (!e.target.closest('input, 
   try {
     state.settings = await invoke('settings_get');
   } catch {
-    state.settings = { favorites: [], showSteamWindow: false, offlineMode: false, webApiKey: '', view: 'grid', sort: 'name', scope: 'account', showSoftware: true };
+    state.settings = { favorites: [], showSteamWindow: false, offlineMode: false, webApiKey: '', view: 'grid', sort: 'name', scope: 'account', showSoftware: true, autoUpdate: true };
   }
   renderChrome();
   renderPage();
   await load();
+  checkAppUpdate();
   setInterval(pollStatus, 3000);
   // Advance the hero like the TV app, unless the pointer is resting on it.
   setInterval(() => {
