@@ -6,6 +6,8 @@ Every Steam account, one click away. A small native Windows app by PG.
 
 More at [lilpatter.github.io/hangar](https://lilpatter.github.io/hangar/).
 
+<p align="center"><img src="screenshots/home.jpg" width="100%" alt="Home with a featured game, playtime and Continue Playing for the signed-in account." /></p>
+
 ## What it does
 
 - **Silent account switching.** Changes the signed-in Steam account without the account picker or a password prompt, and sends Steam straight to the tray.
@@ -15,6 +17,13 @@ More at [lilpatter.github.io/hangar](https://lilpatter.github.io/hangar/).
 - **Optional Steam Web API key** adds games an account owns but has never opened on this PC.
 
 Hangar never reads or stores passwords. An account switches silently once it has signed in on this PC with *Remember me* checked.
+
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/games.jpg" width="49%" alt="Installed games in a grid of Steam cover art, with playtime for each." />
+  <img src="screenshots/accounts.jpg" width="49%" alt="Three remembered Steam accounts, each with a Switch button, and Add Account." />
+</p>
 
 ## Requirements
 
@@ -26,7 +35,7 @@ Hangar updates itself from this page's releases and checks each download against
 
 ## Credits
 
-Game data from the Steam client's own cache and the Steam store.
+Made by [PG](https://lilpatter.github.io).
 
 Not affiliated with Valve. Steam is a trademark of Valve Corporation.
 
