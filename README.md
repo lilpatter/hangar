@@ -1,6 +1,6 @@
 # Hangar
 
-Every Steam account, one click away. A small native Windows app by PG.
+Every Steam account, one click away. A small native app for Windows 10 and 11, by PG.
 
 **[Download the latest release](https://github.com/lilpatter/hangar/releases/latest)**: `Hangar_<version>_x64-setup.exe` installs it, `hangar.exe` runs without installing.
 
@@ -28,6 +28,8 @@ Hangar never reads or stores passwords. An account switches silently once it has
 ## Requirements
 
 Windows 10 or 11 with Steam and the WebView2 runtime, which ships with Windows 11.
+
+Hangar is a Windows app. There's no Mac version yet: the Mac-style sidebar and window buttons are just part of its design.
 
 ## Updates
 
