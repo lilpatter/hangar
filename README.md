@@ -12,11 +12,14 @@ More at [lilpatter.github.io/hangar](https://lilpatter.github.io/hangar/).
 
 - **Silent account switching.** Changes the signed-in Steam account without the account picker or a password prompt, and sends Steam straight to the tray.
 - **Play as…** A game owned by another account on this PC gets a *Play as <name>* button: one click switches accounts and launches it.
-- **Your whole library.** Every game on every account, installed or not, in a grid of Steam's own cover art or a list with playtime, last played and size.
+- **Your whole library.** Every game on every account, installed or not, in a grid of Steam's own cover art or a list with playtime, last played and size. Filter, sort, and look at one account or all of them.
 - **Favorites**, shared by every account.
+- **Friends, chat and profiles.** See who's online and what they're playing, read and send messages with your full history, and open profiles with their games, games in common and comments. Sign in by approving a QR code in the Steam Mobile App. Hangar's chat runs as its own session, so it never changes your online status.
+- **Steam stays out of the way.** Hangar starts Steam in the tray, with no windows, and games launched from Hangar do the same.
+- **Steam's memory kept low.** While Steam sits idle, Hangar asks Windows to page out the memory it isn't using: about 330 MB down to about 30–70 MB. Never while a game runs.
 - **Optional Steam Web API key** adds games an account owns but has never opened on this PC.
 
-Hangar never reads or stores passwords. An account switches silently once it has signed in on this PC with *Remember me* checked.
+Hangar never reads or stores passwords. An account switches silently once it has signed in on this PC with *Remember me* checked. The friends sign-in is kept encrypted with Windows' own data protection, and you can revoke it under Steam's *Authorized Devices*.
 
 ## Screenshots
 
